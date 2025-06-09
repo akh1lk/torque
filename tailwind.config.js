@@ -12,6 +12,15 @@ module.exports = {
   			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
   			'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))'
   		},
+  		keyframes: {
+  			gradient: {
+  				'0%': { backgroundPosition: '0% 0%' },
+  				'100%': { backgroundPosition: '100% 0%' },
+  			},
+  		},
+  		animation: {
+  			gradient: 'gradient 8s linear infinite'
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
