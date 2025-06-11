@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
+import Image from "next/image";
 import { Calendar, Clock, CheckCircle, Loader2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -60,10 +62,12 @@ export function ScanCard({ scan, index }: ScanCardProps) {
       {/* Thumbnail */}
       <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
         {scan.thumbnail ? (
-          <img
+          <Image
             src={scan.thumbnail}
             alt={scan.title}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -75,13 +79,15 @@ export function ScanCard({ scan, index }: ScanCardProps) {
         
         {/* Overlay on hover */}
         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
-          <Button
-            size="sm"
-            className="opacity-0 group-hover:opacity-100 transition-all duration-200 bg-white text-slate-900 hover:bg-slate-100"
-          >
-            <Eye className="w-4 h-4 mr-1" />
-            View
-          </Button>
+          <Link href={`/scan/${scan.id}`}>
+            <Button
+              size="sm"
+              className="opacity-0 group-hover:opacity-100 transition-all duration-200 bg-white text-slate-900 hover:bg-slate-100"
+            >
+              <Eye className="w-4 h-4 mr-1" />
+              View
+            </Button>
+          </Link>
         </div>
 
         {/* Status badge */}
@@ -129,9 +135,11 @@ export function ScanCard({ scan, index }: ScanCardProps) {
               <Button size="sm" variant="outline" className="flex-1">
                 Download
               </Button>
-              <Button size="sm" className="flex-1 bg-gradient-to-r from-slate-900 to-blue-900 hover:from-slate-800 hover:to-blue-800 text-white">
-                View 3D
-              </Button>
+              <Link href={`/scan/${scan.id}`} className="flex-1">
+                <Button size="sm" className="w-full bg-gradient-to-r from-slate-900 to-blue-900 hover:from-slate-800 hover:to-blue-800 text-white">
+                  View 3D
+                </Button>
+              </Link>
             </>
           )}
           {scan.status === "processing" && (

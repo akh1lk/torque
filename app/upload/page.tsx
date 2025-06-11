@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 import { FileDropzone } from "@/components/FileDropzone";
 import { UploadForm } from "@/components/UploadForm";
@@ -154,7 +155,7 @@ export default function UploadPage() {
                   Upload Successful!
                 </h2>
                 <p className="text-slate-600 mb-8 max-w-md mx-auto">
-                  Your scan "{scanTitle}" has been uploaded successfully. We are now processing your video to create a 3D model.
+                  Your scan &quot;{scanTitle}&quot; has been uploaded successfully. We are now processing your video to create a 3D model.
                 </p>
                 <div className="space-y-4">
                   <Button
@@ -165,12 +166,14 @@ export default function UploadPage() {
                   >
                     Upload Another Scan
                   </Button>
-                  <Button
-                    size="lg"
-                    className="bg-gradient-to-r from-slate-900 to-blue-900 hover:from-slate-800 hover:to-blue-800 text-white"
-                  >
-                    View My Scans
-                  </Button>
+                  <Link href="/dashboard">
+                    <Button
+                      size="lg"
+                      className="bg-gradient-to-r from-slate-900 to-blue-900 hover:from-slate-800 hover:to-blue-800 text-white"
+                    >
+                      View My Scans
+                    </Button>
+                  </Link>
                 </div>
               </motion.div>
             )}

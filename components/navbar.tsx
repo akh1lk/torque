@@ -38,7 +38,7 @@ export const Navbar = () => {
 
         {/* CTA Buttons */}
         <div className="flex items-center space-x-3">
-          <Button variant="outline" className="text-white hover:text-white border-slate-300 hover:border-slate-400">
+          <Button variant="outline" className="text-black hover:text-white border-slate-300 hover:border-slate-400">
             Login
           </Button>
           <Button className="bg-gradient-to-r from-slate-900 to-blue-900 hover:from-slate-800 hover:to-blue-800 text-white">

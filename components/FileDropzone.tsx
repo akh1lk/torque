@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { Upload, File, X } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -12,13 +12,13 @@ interface FileDropzoneProps {
 export function FileDropzone({ selectedFile, onFileSelect }: FileDropzoneProps) {
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const acceptedTypes = [".mp4", ".mov", ".avi"];
-  const maxFileSize = 100 * 1024 * 1024; // 100MB
+  const acceptedTypes = useMemo(() => [".mp4", ".mov", ".avi"], []);
+  const maxFileSize = useMemo(() => 100 * 1024 * 1024, []); // 100MB
 
-  const validateFile = (file: File): boolean => {
+  const validateFile = useCallback((file: File): boolean => {
     const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
     return acceptedTypes.includes(fileExtension) && file.size <= maxFileSize;
-  };
+  }, [acceptedTypes, maxFileSize]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -42,7 +42,7 @@ export function FileDropzone({ selectedFile, onFileSelect }: FileDropzoneProps) 
     } else {
       alert("Please select a valid video file (.mp4, .mov, .avi) under 100MB.");
     }
-  }, [onFileSelect]);
+  }, [onFileSelect, validateFile]);
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
-import GradientText from "./GradientText";
+import GradientText from "@/components/GradientText";
 
 // 3D Model Viewer Component (placeholder)
 const ModelViewer = ({ modelName }: { modelName: string }) => {
@@ -48,7 +48,7 @@ const ModelViewer = ({ modelName }: { modelName: string }) => {
   );
 };
 
-export function LandingPage() {
+export default function Page() {
   const [selectedModel, setSelectedModel] = useState("Shoe");
   const [showDemoModal, setShowDemoModal] = useState(false);
   
@@ -157,10 +157,12 @@ export function LandingPage() {
               transition={{ delay: 0.5 }}
               className="flex flex-col sm:flex-row gap-4"
             >
-              <Button size="lg" className="text-lg px-8 py-6 bg-gradient-to-r from-slate-900 to-blue-900 hover:from-slate-800 hover:to-blue-800 text-white border-0 shadow-lg">
-                Try it free
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
+              <Link href="/upload">
+                <Button size="lg" className="text-lg px-8 py-6 bg-gradient-to-r from-slate-900 to-blue-900 hover:from-slate-800 hover:to-blue-800 text-white border-0 shadow-lg">
+                  Try it free
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
               <Button 
                 variant="outline" 
                 size="lg" 
@@ -214,11 +216,6 @@ export function LandingPage() {
           </motion.div>
         </div>
       </section>
-
-      {/* Divider
-      <div className="flex justify-center py-8">
-        <div className="w-3/4 max-w-2xl h-px bg-slate-300"></div>
-      </div> */}
 
       {/* How It Works Section */}
       <section id="how-it-works" className="py-8 relative">

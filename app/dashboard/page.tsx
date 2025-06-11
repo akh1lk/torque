@@ -11,56 +11,56 @@ import { Button } from "@/components/ui/button";
 // Mock data for scans
 const dummyScans: Scan[] = [
   {
-    id: "1",
+    id: "studio-desk-june-2024",
     title: "Studio A — April 9",
     date: "April 9, 2025",
     status: "complete",
     thumbnail: undefined
   },
   {
-    id: "2",
+    id: "vintage-chair",
     title: "Vintage Camera Collection",
     date: "April 8, 2025",
     status: "processing",
     processingProgress: 67
   },
   {
-    id: "3",
+    id: "corner-room-scan",
     title: "Office Chair Prototype",
     date: "April 7, 2025",
     status: "complete",
     thumbnail: undefined
   },
   {
-    id: "4",
+    id: "processing-scan",
     title: "Ceramic Vase Series",
     date: "April 6, 2025",
     status: "failed",
     thumbnail: undefined
   },
   {
-    id: "5",
+    id: "sneaker-design",
     title: "Sneaker Design Mockup",
     date: "April 5, 2025",
     status: "processing",
     processingProgress: 23
   },
   {
-    id: "6",
+    id: "art-sculpture",
     title: "Art Sculpture — Bronze",
     date: "April 4, 2025",
     status: "complete",
     thumbnail: undefined
   },
   {
-    id: "7",
+    id: "kitchen-appliance",
     title: "Kitchen Appliance Test",
     date: "April 3, 2025",
     status: "complete",
     thumbnail: undefined
   },
   {
-    id: "8",
+    id: "jewelry-collection",
     title: "Jewelry Collection",
     date: "April 2, 2025",
     status: "processing",
