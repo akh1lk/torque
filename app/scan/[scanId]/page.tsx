@@ -106,10 +106,6 @@ export default function ScanPage() {
             className="flex items-center gap-2 text-sm text-slate-600 mb-8"
           >
             <Link href="/dashboard" className="hover:text-slate-900 transition-colors">
-              Dashboard
-            </Link>
-            <span>/</span>
-            <Link href="/dashboard" className="hover:text-slate-900 transition-colors">
               Scans
             </Link>
             <span>/</span>

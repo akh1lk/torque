@@ -32,7 +32,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head></head>
-      <body className={cn(GeistSans.className, "antialiased")}>
+      <body 
+        className={cn(GeistSans.className, "antialiased")}
+        style={{ 
+          fontFamily: `-apple-system, BlinkMacSystemFont, ${GeistSans.style.fontFamily}` 
+        }}
+      >
         <Toaster position="top-center" richColors />
         {children}
       </body>

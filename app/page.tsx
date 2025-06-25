@@ -157,9 +157,9 @@ export default function Page() {
               transition={{ delay: 0.5 }}
               className="flex flex-col sm:flex-row gap-4"
             >
-              <Link href="/upload">
+              <Link href="/signup">
                 <Button size="lg" className="text-lg px-8 py-6 bg-gradient-to-r from-slate-900 to-blue-900 hover:from-slate-800 hover:to-blue-800 text-white border-0 shadow-lg">
-                  Try it free
+                  Get started free
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>

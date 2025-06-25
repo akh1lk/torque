@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     (
       <div
         tw="flex h-full w-full bg-black"
-        style={{ fontFamily: "Geist Sans" }}
+        style={{ fontFamily: "-apple-system, BlinkMacSystemFont, Geist Sans" }}
       >
         {/* @ts-expect-error */}
         <img src={imageData} alt="vercel opengraph background" />
