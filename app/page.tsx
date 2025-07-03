@@ -92,16 +92,16 @@ export default function Page() {
   ];
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
+    <div className="min-h-screen bg-orange-50 text-slate-900">
       
       {/* Navbar */}
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-12">
         {/* Background Image */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-50"
           style={{ backgroundImage: 'url(/landinggradientbg.png)' }}
         />
         <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-8 items-center relative z-10">
@@ -112,15 +112,7 @@ export default function Page() {
             transition={{ duration: 0.8 }}
             className="space-y-8"
           >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 backdrop-blur-sm text-slate-700 text-sm border border-slate-200"
-            >
-              <Sparkles className="w-4 h-4 text-slate-900" />
-              Powered by Neural Gaussian Splatting
-            </motion.div>
+           
             
             <div className="space-y-4">
               <motion.h1
@@ -134,11 +126,11 @@ export default function Page() {
                   colors={["#0f172a", "#1e3a8a", "#1e293b", "#dc2626", "#ea580c", "#1e3a8a", "#0f172a"]}
                   animationSpeed={8}
                   showBorder={false}
-                  className=""
+                  className="text-6xl lg:text-8xl"
                 >
                   3D Models
                 </GradientText>{" "}
-                Seamlessly.
+                <em>Seamlessly.</em>
               </motion.h1>
               
               <motion.p
@@ -147,7 +139,7 @@ export default function Page() {
                 transition={{ delay: 0.4 }}
                 className="text-xl text-slate-600 max-w-lg"
               >
-                Upload a short clip. Get an interactive 3D model. No app, no LiDAR.
+                Upload a clip. Get a 3D model. No fancy app, no LiDAR.
               </motion.p>
             </div>
             
@@ -416,15 +408,12 @@ export default function Page() {
           <div className="grid md:grid-cols-4 gap-8">
             {/* Logo & Tagline */}
             <div className="md:col-span-2">
-              <Link href="/" className="inline-flex items-center space-x-2 mb-4">
-                <Image 
-                  src="/TorqueIcon.svg" 
+              <Link href="/" className="inline-flex items-center mb-4">
+                <img 
+                  src="/torqueicon.png" 
                   alt="Torque" 
-                  width={32} 
-                  height={32}
-                  className="w-8 h-8"
+                  style={{ height: '40px', width: 'auto' }}
                 />
-                <span className="text-xl font-bold text-slate-900">Torque</span>
               </Link>
               <p className="text-slate-600 mb-6 max-w-md">
                 Simple scans. Stunning results.
