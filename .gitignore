@@ -1,40 +1,74 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
-.pnp.js
+frontend/node_modules
+frontend/.pnp
+frontend/.pnp.js
 
 # testing
-/coverage
+frontend/coverage
 
 # next.js
-/.next/
-/out/
+frontend/.next/
+frontend/out/
 
 # python
-venv/
-.env
-__pycache__
+frontend/venv/
+frontend/.env
+frontend/__pycache__
+
+# backend python
+backend/venv/
+backend/.env
+backend/__pycache__/
+backend/*.pyc
+backend/uploads/
+backend/outputs/
+backend/models/
+backend/*.pt
+backend/*.pth
+backend/first_frame.jpg
+backend/frame_overlay.jpg
+backend/segmented_video.mp4
 
 # production
-/build
+frontend/build
 
 # misc
 .DS_Store
 *.pem
 
 # debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
 
 # local env files
-.env*.local
+frontend/.env*.local
 
 # vercel
-.vercel
+frontend/.vercel
 
 # typescript
-*.tsbuildinfo
-next-env.d.ts
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# manual
+.venv
+backend/awsFunctions/__pycache__
+backend/awsFunctions/filter*
+backend/awsFunctions/sparse
+backend/awsFunctions/co*
+backend/awsFunctions/points*
+backend/awsFunctions/run*
+backend/awsFunctions/sam2_m*
+backend/run_sam2.py
+backend/sam2_manager*
+backend/test_workflow.py
+
+images
+masked_output
+masksfinal
+converted_images*
+images.bin*
+# backend/awsFunctions/
