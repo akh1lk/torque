@@ -1,6 +1,6 @@
 # Torque
 
-Torque is a 3D scanning web application that converts videos into interactive 3D models using Neural Gaussian Splatting. Users can upload videos, define object boundaries through an intuitive brush interface, and generate 3D models with transparent backgrounds.
+Torque is a 3D scanning web application that converts images into interactive 3D models using Gaussian Splatting and SAM2 Background Removal. Users can upload images, define object boundaries through an intuitive interface, and generate 3D models without backgrounds.
 
 ## Architecture
 
