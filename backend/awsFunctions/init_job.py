@@ -73,15 +73,15 @@ def init_job(job_id: str, bucket: str, fastapi_url: str, token: str):
     run(["cp", first_image_path, first_frame])
 
     # Initialize Sam2Service and run segmentation on first frame
-    sam2_service = Sam2Service()
+    svc = Sam2Service()
     print("▶ Running SAM2 on first frame for initial mask")
     
     # Use Sam2Service.img_mask and save masks.npz to preview directory
-    mask_result = sam2_service.img_mask(first_frame, output_dir=preview_dir)
+    mask_result = svc.img_mask(first_frame, output_dir=preview_dir)
     
     # Create overlay preview using overlay_outline
     init_mask_path = os.path.join(preview_dir, "masks.npz")
-    preview_overlay = sam2_service.overlay_outline(
+    preview_overlay = svc.overlay_outline(
         image_path=first_frame,
         mask_path=init_mask_path,
         out_dir=preview_dir,

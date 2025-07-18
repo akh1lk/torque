@@ -44,10 +44,11 @@ class Sam2Service:
             np.savez_compressed(os.path.join(output_dir, "img_masks.npz"), binary_masks)
             print(f"✅ Saved masks to: {output_dir}/img_masks.npz")
         
+        output_path = os.path.join(f"{output_dir}/img_masks.npz")
         if not (points and labels):
             merged = np.any(masks_arr, axis=0).astype(np.uint8) * 255
             return merged
-        return masks_arr
+        return output_path
     
     def video_mask(self, video_path: str,job_id: str, points: Optional[List[List[int]]] = None, labels: Optional[List[int]] = None) -> np.ndarray:
         """
@@ -59,7 +60,10 @@ class Sam2Service:
             labels=[labels] if labels else None,
             stream=True
         )
-        output_dir = os.path.expanduser(f"~/torque/jobs/{job_id}/masks")
+
+        output_dir = os.path.expanduser(f"~/torque/jobs/{job_id}")
+        masks_dir = os.path.join(output_dir, "masks")
+        os.makedirs(masks_dir, exist_ok=True)
         
         all_masks = []
         for i, result in enumerate(results):
@@ -71,10 +75,11 @@ class Sam2Service:
 
         # Save full 3D mask array: (num_frames, H, W)
         mask_array = np.stack(all_masks)
-        np.savez_compressed(os.path.join(output_dir, "video_masks.npz"), mask_array)
+        output_path = os.path.join(masks_dir, "video_masks.npz")
+        np.savez_compressed(output_path, mask_array)
 
-        print(f"✅ Done. Saved masks to: {output_dir}/video_masks.npz")
-        return mask_array
+        print(f"✅ Done. Saved masks to: {output_path}")
+        return output_path
 
     # Mask ARRAY -> IMAGE
 
@@ -139,29 +144,18 @@ class Sam2Service:
         
         return output_path
     
-    def create_rgba_mask(self, image_path: str, mask_path: str, output_path: str):
+    def create_rgba_mask(self, image_path: str, mask: np.ndarray, output_path: str):
         """
-        Create an RGBA PNG using the mask as the alpha channel.
+        Create an RGBA PNG using a single mask as the alpha channel.
         
         Args:
             image_path: Path to the input image
-            mask_path: Path to the npz mask file with 0s and 1s
+            mask: 2D numpy array mask (H, W) with 0s and 1s
             output_path: Path where the RGBA PNG will be saved
         
         Returns:
             str: Path to the saved RGBA PNG file
         """
-        # Load mask from file
-        mask_data = np.load(mask_path)
-        
-        # Extract mask array from npz file (usually stored as 'arr_0')
-        if isinstance(mask_data, np.lib.npyio.NpzFile):
-            # Get thxe first (and likely only) array from the npz file
-            key = list(mask_data.keys())[0]  # Usually 'arr_0'
-            masks = mask_data[key]
-        else:
-            masks = mask_data
-        
         # Load image
         image = cv2.imread(image_path)
         if image is None:
@@ -170,24 +164,15 @@ class Sam2Service:
         # Convert BGR to RGB
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         
-        # Handle different mask formats
-        if masks.ndim == 2:
-            # Single mask - use as is
-            combined_mask = masks
-        else:
-            # Multiple masks - combine them using logical OR
-            combined_mask = np.any(masks, axis=0).astype(np.uint8)
-        
-        # Convert mask to 0-255 range for alpha channel with proper thresholding
-        alpha_channel = (combined_mask > 0).astype(np.uint8) * 255
+        # Convert mask to 0-255 range for alpha channel
+        alpha_channel = (mask > 0).astype(np.uint8) * 255
         
         # Create RGBA image by adding alpha channel
         rgba_image = np.dstack((image_rgb, alpha_channel))
         
-        # Create output directory if it doesn't exist
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        # Output directory is already created by batch function - no need to create for each image
         
-        # Save as PNG (OpenCV doesn't support RGBA, so we'll use a different approach)
+        # Save as PNG
         from PIL import Image
         pil_image = Image.fromarray(rgba_image, 'RGBA')
         pil_image.save(output_path, 'PNG')
@@ -196,9 +181,10 @@ class Sam2Service:
         
         return output_path
     
-    def batch_create_rgba_masks(self, job_id: str, upload_to_s3: bool = False, s3_bucket: str = None, s3_prefix: str = None):
+    def batch_create_rgba_masks(self, job_id: str, upload_to_s3: bool = True, s3_bucket: str = None, s3_prefix: str = None):
         """
-        Create RGBA masks for all images in a job directory using the job's mask data.
+        Create RGBA masks for all images in a job directory using video_masks.npz.
+        Each mask in the array corresponds to each image in sequential order.
         
         Args:
             job_id: The job ID to process
@@ -211,27 +197,39 @@ class Sam2Service:
         """
         # Define paths
         images_dir = os.path.expanduser(f"~/torque/jobs/{job_id}/images")
-        masks_dir = os.path.expanduser(f"~/torque/jobs/{job_id}/masks")
-        output_dir = os.path.expanduser(f"~/torque/jobs/{job_id}/rgba_images")
-        mask_path = os.path.join(masks_dir, "video_masks.npz")
+        output_dir = os.path.expanduser(f"~/torque/jobs/{job_id}/rgba")
+        video_masks_path = os.path.expanduser(f"~/torque/jobs/{job_id}/masks/video_masks.npz")
         
         # Validate inputs
         if not os.path.exists(images_dir):
             raise ValueError(f"Images directory not found: {images_dir}")
-        if not os.path.exists(mask_path):
-            raise ValueError(f"Mask file not found: {mask_path}")
+        if not os.path.exists(video_masks_path):
+            raise ValueError(f"Video masks file not found: {video_masks_path}")
         
         if upload_to_s3 and not s3_bucket:
             raise ValueError("s3_bucket is required when upload_to_s3=True")
         
+        # Load video masks array (num_frames, H, W)
+        mask_data = np.load(video_masks_path)
+        if isinstance(mask_data, np.lib.npyio.NpzFile):
+            key = list(mask_data.keys())[0]  # Usually 'arr_0'
+            video_masks = mask_data[key]
+        else:
+            video_masks = mask_data
+        
         # Create output directory
         os.makedirs(output_dir, exist_ok=True)
         
-        # Get all image files
-        image_files = [f for f in os.listdir(images_dir) if f.lower().endswith(('.jpg', '.jpeg', '.png', '.heic'))]
-        image_files.sort()  # Ensure consistent ordering
+        # Get all image files (already sorted by init_job as 0001.png, 0002.png, etc.)
+        image_files = [f for f in os.listdir(images_dir) if f.lower().endswith(('.jpg', '.jpeg', '.png', '.heic')) and not f.endswith('_video.mp4')]
+        image_files.sort()  # Sequential ordering maintained
         
         print(f"🎭 Processing {len(image_files)} images for job {job_id}")
+        print(f"📊 Video masks shape: {video_masks.shape}")
+        
+        # validate len(masks) == len(images)
+        if len(image_files) != video_masks.shape[0]:
+            raise ValueError(f"Mismatch: {len(image_files)} images but {video_masks.shape[0]} masks")
         
         results = {
             'processed': 0,
@@ -242,14 +240,17 @@ class Sam2Service:
         
         for i, image_filename in enumerate(image_files):
             try:
-                # Paths
+                # Paths - maintain sequential naming convention
                 image_path = os.path.join(images_dir, image_filename)
-                name, ext = os.path.splitext(image_filename)
-                output_filename = f"{name}_rgba.png"
+                name, _ = os.path.splitext(image_filename)
+                output_filename = f"{name}.png"  # Keep same numbering: 0001.png -> 0001.png
                 output_path = os.path.join(output_dir, output_filename)
                 
-                # Create RGBA mask
-                self.create_rgba_mask(image_path, mask_path, output_path)
+                # Get the corresponding mask for this image
+                mask_for_image = video_masks[i]  # Shape: (H, W)
+                
+                # Create RGBA mask using the specific mask for this image
+                self.create_rgba_mask(image_path, mask_for_image, output_path)
                 results['processed'] += 1
                 results['output_files'].append(output_path)
                 
