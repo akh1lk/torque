@@ -30,7 +30,7 @@ class Sam2Service:
         result = None
         if points and labels:
             # results with prompts
-            result = self.sam_img(image_path, points=[points], labels=[labels])
+            result = self.sam_img(image_path, points=points, labels=labels)
         else:
             # results without prompts
             result = self.sam_img(image_path)
@@ -56,8 +56,8 @@ class Sam2Service:
         """
         results = self.sam_video(
             source=video_path,
-            points=[points] if points else None,
-            labels=[labels] if labels else None,
+            points=points if points else None,
+            labels=labels if labels else None,
             stream=True
         )
 

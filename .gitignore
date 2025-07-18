@@ -60,7 +60,7 @@ backend/awsFunctions/filter*
 backend/awsFunctions/sparse
 backend/awsFunctions/co*
 backend/awsFunctions/points*
-backend/awsFunctions/run*
+backend/awsFunctions/run_sam22*
 backend/awsFunctions/sam2_m*
 backend/run_sam2.py
 backend/sam2_manager*

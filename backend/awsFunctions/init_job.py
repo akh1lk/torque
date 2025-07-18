@@ -1,99 +1,66 @@
-import os
-import sys
 import argparse
-import subprocess
-from urllib.parse import urlparse
-import cv2
-import numpy as np
-
-import boto3
-import requests
+import os
+from aws_utils import (
+    run_check, s3_download_dir, s3_upload_dir, patch_status,
+    get_image_files, JobPaths, print_job_summary
+)
 from sam2_service import Sam2Service
-
-# helpers
-
-def run(cmd, **kw):
-    print("▶", " ".join(cmd))
-    subprocess.run(cmd, check=True, **kw)
-
-def s3_download_dir(s3_pref: str, local_dir: str):
-    """
-    Downloads a s3 directory to a local directory.
-    """ 
-    run(["aws", "s3", "cp", s3_pref, local_dir, "--recursive"])
-
-def s3_upload_dir(local_dir: str, s3_pref: str):
-    """
-    Uploads a local directory to a s3 directory.
-    """ 
-    run(["aws", "s3", "cp", s3_pref, local_dir, "--recursive"])
-
-def patch_status(fastapi_url: str, token: str, job_id: str):
-    """
-    PATCH status to FastAPI /jobs/{job_id} endpoint.
-    """
-    headers = {'Authorization': f'Bearer {token}'}
-    resp = requests.patch(f"{fastapi_url}/jobs/{job_id}", json={"status": "init_done"}, headers=headers)
-    resp.raise_for_status()
 
 # actual job initialization
 
 def init_job(job_id: str, bucket: str, fastapi_url: str, token: str):
-    base = os.path.expanduser(f"~/torque/jobs/{job_id}")  # Fixed string formatting
-    images_dir = os.path.join(base, "images")
-    preview_dir = os.path.join(base, "preview")
-
-    os.makedirs(images_dir, exist_ok=True)
-    os.makedirs(preview_dir, exist_ok=True)
+    paths = JobPaths(job_id)
+    paths.ensure_dirs("images", "preview")
+    
+    print_job_summary(job_id, "INIT JOB", 
+                     workspace=paths.workspace,
+                     images_dir=paths.images,
+                     preview_dir=paths.preview)
 
     # Download images from S3
     s3_images = f"s3://{bucket}/{job_id}/images/"
-    s3_download_dir(s3_images, images_dir)
+    s3_download_dir(s3_images, paths.images)
 
     # Convert images to a propagatable format for SAM2
-    mp4_path = os.path.join(base, f"images/{job_id}_video.mp4")
-    run(["ffmpeg", "-y",
+    run_check(["ffmpeg", "-y",
         "-framerate", "12",
-        "-i", os.path.join(images_dir, "%04d.png"),
-        "-c:v", "libx264",  # Fixed typo: was "libx124"
+        "-i", os.path.join(paths.images, "%04d.png"),
+        "-c:v", "libx264",
         "-pix_fmt", "yuv420p",
-        mp4_path])
+        paths.video])
     
     # Get first frame from images folder (not from video)
-    image_files = [f for f in os.listdir(images_dir) if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
-    image_files.sort()  # Ensure consistent ordering
+    image_files = get_image_files(paths.images)
     
     if not image_files:
-        raise ValueError(f"No image files found in {images_dir}")
+        raise ValueError(f"No image files found in {paths.images}")
     
-    first_image_path = os.path.join(images_dir, image_files[0])
-    first_frame = os.path.join(preview_dir, "first_frame.png")
+    first_image_path = os.path.join(paths.images, image_files[0])
     
     # Copy first image to preview directory
-    run(["cp", first_image_path, first_frame])
+    run_check(["cp", first_image_path, paths.first_frame])
 
     # Initialize Sam2Service and run segmentation on first frame
     svc = Sam2Service()
     print("▶ Running SAM2 on first frame for initial mask")
     
     # Use Sam2Service.img_mask and save masks.npz to preview directory
-    mask_result = svc.img_mask(first_frame, output_dir=preview_dir)
+    mask_result = svc.img_mask(paths.first_frame, output_dir=paths.preview)
     
     # Create overlay preview using overlay_outline
-    init_mask_path = os.path.join(preview_dir, "masks.npz")
     preview_overlay = svc.overlay_outline(
-        image_path=first_frame,
-        mask_path=init_mask_path,
-        out_dir=preview_dir,
+        image_path=paths.first_frame,
+        mask_path=paths.img_masks,
+        out_dir=paths.preview,
     )
     
     print(f"✅ Created preview overlay: {preview_overlay}")
 
     # Upload preview to S3
     s3_preview = f"s3://{bucket}/{job_id}/preview/"
-    s3_upload_dir(preview_dir, s3_preview)
+    s3_upload_dir(paths.preview, s3_preview)
 
-    patch_status(fastapi_url, token, job_id)
+    patch_status(fastapi_url, token, job_id, "init_done")
     print("Job initialized successfully")
 
 def main():
