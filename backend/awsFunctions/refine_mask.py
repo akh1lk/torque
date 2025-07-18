@@ -31,7 +31,7 @@ def main():
                      preview_dir=paths.preview,
                      config_dir=paths.config)
 
-    # Load 1st frame image
+    # load 1st frame image
     throwFNF(paths.first_frame)
 
     # download latest updated prompts @ config/initial_points.json

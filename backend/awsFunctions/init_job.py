@@ -17,11 +17,10 @@ def init_job(job_id: str, bucket: str, fastapi_url: str, token: str):
                      images_dir=paths.images,
                      preview_dir=paths.preview)
 
-    # Download images from S3
     s3_images = f"s3://{bucket}/{job_id}/images/"
     s3_download_dir(s3_images, paths.images)
 
-    # Convert images to a propagatable format for SAM2
+    # SAM2 needs video, so imgs -> video
     run_check(["ffmpeg", "-y",
         "-framerate", "12",
         "-i", os.path.join(paths.images, "%04d.png"),
@@ -29,7 +28,7 @@ def init_job(job_id: str, bucket: str, fastapi_url: str, token: str):
         "-pix_fmt", "yuv420p",
         paths.video])
     
-    # Get first frame from images folder (not from video)
+    # first frame for preview / mask modification
     image_files = get_image_files(paths.images)
     
     if not image_files:
@@ -37,17 +36,16 @@ def init_job(job_id: str, bucket: str, fastapi_url: str, token: str):
     
     first_image_path = os.path.join(paths.images, image_files[0])
     
-    # Copy first image to preview directory
     run_check(["cp", first_image_path, paths.first_frame])
 
-    # Initialize Sam2Service and run segmentation on first frame
+    # init sam2service and segment first frame (NO PROMPTS)
     svc = Sam2Service()
     print("▶ Running SAM2 on first frame for initial mask")
     
-    # Use Sam2Service.img_mask and save masks.npz to preview directory
+    # save masks.npz to preview directory
     mask_result = svc.img_mask(paths.first_frame, output_dir=paths.preview)
     
-    # Create overlay preview using overlay_outline
+    # create overlay for visual coolness
     preview_overlay = svc.overlay_outline(
         image_path=paths.first_frame,
         mask_path=paths.img_masks,

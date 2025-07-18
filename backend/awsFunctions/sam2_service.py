@@ -117,16 +117,16 @@ class Sam2Service:
             # Mask contains 0 and 1 values, convert to 0-255 for contour detection
             mask_binary = (mask * 255).astype(np.uint8)
             
-            # Create edge map
+            # edge map
             contours, _ = cv2.findContours(mask_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
-            # Translucent fill (use original mask for boolean indexing)
+            # translucent fill (use original mask for boolean indexing)
             colored = np.zeros_like(image)
             colored[mask > 0] = color
             cv2.addWeighted(colored, alpha, overlay, 1 - alpha, 0, overlay)
             
-            # Draw outline - convert thickness to int for cv2.drawContours
-            thickness_int = max(1, int(thickness * 10))  # Scale float thickness to reasonable int
+            # draw outline - convert thickness to int for cv2.drawContours
+            thickness_int = max(1, int(thickness * 10)) 
             cv2.drawContours(overlay, contours, -1, color, thickness_int)
         
         # Create output directory if it doesn't exist
@@ -171,7 +171,7 @@ class Sam2Service:
         rgba_image = np.dstack((image_rgb, alpha_channel))
         
         # Output directory is already created by batch function - no need to create for each image
-        
+    
         # Save as PNG
         from PIL import Image
         pil_image = Image.fromarray(rgba_image, 'RGBA')
@@ -185,12 +185,6 @@ class Sam2Service:
         """
         Create RGBA masks for all images in a job directory using video_masks.npz.
         Each mask in the array corresponds to each image in sequential order.
-        
-        Args:
-            job_id: The job ID to process
-            upload_to_s3: Whether to upload results to S3
-            s3_bucket: S3 bucket name (required if upload_to_s3=True)
-            s3_prefix: S3 prefix for uploaded files (optional)
         
         Returns:
             dict: Summary of processing results
