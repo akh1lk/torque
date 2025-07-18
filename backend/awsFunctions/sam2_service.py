@@ -42,7 +42,7 @@ class Sam2Service:
             # Convert to binary masks (0s and 1s) for consistency with video_mask
             binary_masks = (masks_arr > 0).astype(np.uint8)
             np.savez_compressed(os.path.join(output_dir, "img_masks.npz"), binary_masks)
-            print(f"✅ Saved masks to: {output_dir}/img_masks.npz")
+            print(f"Saved masks to: {output_dir}/img_masks.npz")
         
         output_path = os.path.join(f"{output_dir}/img_masks.npz")
         if not (points and labels):
@@ -78,7 +78,7 @@ class Sam2Service:
         output_path = os.path.join(masks_dir, "video_masks.npz")
         np.savez_compressed(output_path, mask_array)
 
-        print(f"✅ Done. Saved masks to: {output_path}")
+        print(f"Done. Saved masks to: {output_path}")
         return output_path
 
     # Mask ARRAY -> IMAGE
@@ -140,7 +140,7 @@ class Sam2Service:
         
         # Save the overlaid image
         cv2.imwrite(output_path, overlay)
-        print(f"✅ Saved outlined image to: {output_path}")
+        print(f"Saved outlined image to: {output_path}")
         
         return output_path
     
@@ -177,7 +177,7 @@ class Sam2Service:
         pil_image = Image.fromarray(rgba_image, 'RGBA')
         pil_image.save(output_path, 'PNG')
         
-        print(f"✅ Saved RGBA image to: {output_path}")
+        print(f"Saved RGBA image to: {output_path}")
         
         return output_path
     
@@ -224,8 +224,8 @@ class Sam2Service:
         image_files = [f for f in os.listdir(images_dir) if f.lower().endswith(('.jpg', '.jpeg', '.png', '.heic')) and not f.endswith('_video.mp4')]
         image_files.sort()  # Sequential ordering maintained
         
-        print(f"🎭 Processing {len(image_files)} images for job {job_id}")
-        print(f"📊 Video masks shape: {video_masks.shape}")
+        print(f"Processing {len(image_files)} images for job {job_id}")
+        print(f"Video masks shape: {video_masks.shape}")
         
         # validate len(masks) == len(images)
         if len(image_files) != video_masks.shape[0]:
@@ -259,17 +259,17 @@ class Sam2Service:
                     try:
                         s3_key = f"{s3_prefix}/{output_filename}" if s3_prefix else output_filename
                         self.s3.upload_file(output_path, s3_bucket, s3_key)
-                        print(f"📤 Uploaded to S3: s3://{s3_bucket}/{s3_key}")
+                        print(f"Uploaded to S3: s3://{s3_bucket}/{s3_key}")
                         results['uploaded'] += 1
                     except Exception as e:
-                        print(f"❌ S3 upload failed for {output_filename}: {e}")
+                        print(f"ERROR: S3 upload failed for {output_filename}: {e}")
                 
             except Exception as e:
-                print(f"❌ Error processing {image_filename}: {e}")
+                print(f"ERROR: Error processing {image_filename}: {e}")
                 results['errors'] += 1
                 continue
         
-        print(f"✅ Batch processing complete:")
+        print(f"Batch processing complete:")
         print(f"   Processed: {results['processed']}/{len(image_files)}")
         print(f"   Errors: {results['errors']}")
         print(f"   Uploaded: {results['uploaded']}")

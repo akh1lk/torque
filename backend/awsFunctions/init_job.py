@@ -54,7 +54,7 @@ def init_job(job_id: str, bucket: str, fastapi_url: str, token: str):
         out_dir=paths.preview,
     )
     
-    print(f"✅ Created preview overlay: {preview_overlay}")
+    print(f"Created preview overlay: {preview_overlay}")
 
     # Upload preview to S3
     s3_preview = f"s3://{bucket}/{job_id}/preview/"

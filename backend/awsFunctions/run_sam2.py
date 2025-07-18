@@ -67,7 +67,7 @@ def main():
         s3_prefix=f"{job_id}/rgba",
     )
     
-    print(f"✅ RGBA processing complete: {results['processed']} images, {results['uploaded']} uploaded")
+    print(f"RGBA processing complete: {results['processed']} images, {results['uploaded']} uploaded")
         
     # Notify FastAPI of job completion
     patch_status(fastapi_url, token, job_id, "sam2_done")

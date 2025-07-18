@@ -69,7 +69,7 @@ def patch_status(fastapi_url: str, token: str, job_id: str, status: str):
     headers = {'Authorization': f'Bearer {token}'}
     resp = requests.patch(f"{fastapi_url}/jobs/{job_id}", json={"status": status}, headers=headers)
     resp.raise_for_status()
-    print(f"✅ Updated job {job_id} status to: {status}")
+    print(f"Updated job {job_id} status to: {status}")
 
 def get_job_workspace(job_id: str) -> str:
     """
@@ -165,7 +165,7 @@ def print_job_summary(job_id: str, stage: str, **kwargs):
     """
     Print a standardized job processing summary.
     """
-    print(f"\n🚀 {stage} - Job: {job_id}")
+    print(f"\n{stage} - Job: {job_id}")
     for key, value in kwargs.items():
-        print(f"📁 {key}: {value}")
+        print(f"{key}: {value}")
     print()
