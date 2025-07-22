@@ -114,10 +114,10 @@ def cleanup_intermediate_files(paths: JobPaths, output_dir: str):
     """
     print("Cleaning up intermediate files...")
     
-    # Remove brush_input directory (just symlinks)
+    # remove brush_input directory (just symlinks)
     brush_input_dir = os.path.join(paths.workspace, "brush_input")
     if os.path.exists(brush_input_dir):
-        # Remove symlinks and directory
+        # remove symlinks and directory
         import shutil
         shutil.rmtree(brush_input_dir)
         print("Removed brush_input symlink directory")
@@ -147,3 +147,21 @@ def main():
                      colmap_dir=paths.colmap,
                      workspace=paths.workspace)
  
+    try:
+        # Step 1: set up Brush data structure
+        brush_data_dir = setup_brush_inputs(paths)
+        
+        # Step 2: run brush training
+        output_dir = run_brush_training(brush_data_dir, args.steps)
+        
+        # Step 3: clean up + finalize out
+        final_model_dir = cleanup_intermediate_files(paths, output_dir)
+        
+        if final_model_dir:
+            # Step 4: upload final model to S3
+            print("Uploading final 3D model to S3...")
+            s3_model_prefix = f"s3://{args.bucket}/{args.job_id}/gaussian_splat/"
+            s3_upload_dir(final_model_dir, s3_model_prefix)
+            print(f"Model uploaded to: {s3_model_prefix}")
+    except Exception as e:
+        
