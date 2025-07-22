@@ -104,3 +104,46 @@ def run_brush_training(brush_data_dir: str, total_steps: str = "10000"):
         print("WARNING: No PLY files found in export directory")
     
     return export_dir
+
+
+
+def cleanup_intermediate_files(paths: JobPaths, output_dir: str):
+    """
+    Clean up intermediate symlink directories.
+    The model files are already in the correct location.
+    """
+    print("Cleaning up intermediate files...")
+    
+    # Remove brush_input directory (just symlinks)
+    brush_input_dir = os.path.join(paths.workspace, "brush_input")
+    if os.path.exists(brush_input_dir):
+        # Remove symlinks and directory
+        import shutil
+        shutil.rmtree(brush_input_dir)
+        print("Removed brush_input symlink directory")
+    
+    # The output_dir already contains the final models
+    if os.path.exists(output_dir):
+        print(f"Final models location: {output_dir}")
+        return output_dir
+    
+    return None
+
+def main():
+    parser = argparse.ArgumentParser(description="Run Brush 3D Gaussian Splatting training")
+    parser.add_argument("--job_id", required=True, help="Job ID")
+    parser.add_argument("--bucket", required=True, help="S3 bucket name")
+    parser.add_argument("--fastapi_url", required=True, help="FastAPI URL")
+    parser.add_argument("--token", required=True, help="FastAPI auth token")
+    parser.add_argument("--steps", default="30000", help="Training steps")
+    parser.add_argument("--resolution", default="1024", help="Output resolution")
+    
+    args = parser.parse_args()
+    
+    paths = JobPaths(args.job_id)
+    
+    print_job_summary(args.job_id, "RUN BRUSH",
+                     rgba_dir=paths.rgba,
+                     colmap_dir=paths.colmap,
+                     workspace=paths.workspace)
+ 
