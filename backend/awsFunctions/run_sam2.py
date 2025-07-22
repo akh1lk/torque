@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 run_sam2.py
 
