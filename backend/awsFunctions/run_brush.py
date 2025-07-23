@@ -12,6 +12,8 @@ EC2 worker script to:
 import argparse
 import os
 import shutil
+import threading
+import time
 from aws_utils import (
     run, patch_status, ensure_dir, s3_upload_dir,
     JobPaths, print_job_summary
@@ -57,19 +59,53 @@ def setup_brush_inputs(paths: JobPaths):
     print("Brush data structure created with symlinks")
     return brush_input_dir
 
-def run_brush_training(brush_data_dir: str, total_steps: str = "10000"):
+def upload_progress_images(progress_dir: str, bucket: str, job_id: str, stop_event: threading.Event):
+    """
+    Background thread to upload progress images every 5 minutes.
+    """
+    while not stop_event.is_set():
+        try:
+            if os.path.exists(progress_dir):
+                # Find latest rendered images
+                image_files = [f for f in os.listdir(progress_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+                if image_files:
+                    # Upload latest images to S3 progress folder
+                    s3_progress_prefix = f"s3://{bucket}/{job_id}/progress/"
+                    s3_upload_dir(progress_dir, s3_progress_prefix)
+                    print(f"Uploaded {len(image_files)} progress images to S3")
+        except Exception as e:
+            print(f"Progress upload error: {e}")
+        
+        # Wait 5 minutes or until stop signal
+        stop_event.wait(300)  # 300 seconds = 5 minutes
+
+def run_brush_training(brush_data_dir: str, total_steps: str = "10000", bucket: str = None, job_id: str = None):
     """
     Run Brush Gaussian Splatting training on the prepared dataset.
     """
     print("Starting Brush training...")
     
-    # Set up export path for outputs
+    # Set up export path for outputs and progress
     export_dir = os.path.join(os.path.dirname(brush_data_dir), "gaussian_splat")
+    progress_dir = os.path.join(os.path.dirname(brush_data_dir), "progress")
     ensure_dir(export_dir)
+    ensure_dir(progress_dir)
+    
+    # Start background thread for progress uploads
+    stop_upload = threading.Event()
+    upload_thread = None
+    if bucket and job_id:
+        upload_thread = threading.Thread(
+            target=upload_progress_images,
+            args=(progress_dir, bucket, job_id, stop_upload)
+        )
+        upload_thread.daemon = True
+        upload_thread.start()
+        print("Started progress image upload thread")
     
     # Brush training command with correct CLI arguments
     brush_cmd = [
-        "/opt/brush_app/brush_app",  # Path to brush executable
+        os.path.expanduser("~/torque/brush/brush_app"),  # Path to brush executable
         brush_data_dir,  # Source path (COLMAP dataset)
         "--total-steps", total_steps,
         "--max-resolution", "1024",
@@ -78,19 +114,29 @@ def run_brush_training(brush_data_dir: str, total_steps: str = "10000"):
         "--export-name", "model_{iter}.ply",
         "--alpha-loss-weight", "0.1",  # For transparency support
         "--eval-every", "1000",
+        "--eval-save-to-disk",  # Save eval images to disk for progress
         "--seed", "42"
     ]
     
     print(f"Running: {' '.join(brush_cmd)}")
     print(f"Export directory: {export_dir}")
+    print(f"Progress directory: {progress_dir}")
     
-    # Run Brush training
-    result = run(' '.join(brush_cmd))
-    
-    if result != 0:
-        raise RuntimeError(f"Brush training failed with exit code {result}")
-    
-    print("Brush training completed successfully")
+    try:
+        # Run Brush training
+        result = run(' '.join(brush_cmd))
+        
+        if result != 0:
+            raise RuntimeError(f"Brush training failed with exit code {result}")
+        
+        print("Brush training completed successfully")
+        
+    finally:
+        # Stop progress upload thread
+        if upload_thread:
+            stop_upload.set()
+            upload_thread.join(timeout=5)
+            print("Stopped progress upload thread")
     
     # Check for exported PLY files
     ply_files = [f for f in os.listdir(export_dir) if f.endswith('.ply')]
@@ -152,7 +198,7 @@ def main():
         brush_data_dir = setup_brush_inputs(paths)
         
         # Step 2: run brush training
-        output_dir = run_brush_training(brush_data_dir, args.steps)
+        output_dir = run_brush_training(brush_data_dir, args.steps, args.bucket, args.job_id)
         
         # Step 3: clean up + finalize out
         final_model_dir = cleanup_intermediate_files(paths, output_dir)
