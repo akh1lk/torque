@@ -9,14 +9,17 @@ from typing import Optional, List, Tuple
 class Sam2Service:
     
     def __init__(self):
+        # Model paths
+        sam2_model_path = os.path.expanduser("~/torque/models/sam2.1_b.pt")
+
         # Image + Video SAM
-        self.sam_img = SAM("sam2.1_l.pt")
+        self.sam_img = SAM(sam2_model_path)
         self.sam_video = SAM2VideoPredictor(overrides=dict(
             conf=0.25,
             task="segment",
             mode="predict",
             imgsz=1024,
-            model="sam2.1_b.pt"
+            model=sam2_model_path
             )
         )
         self.s3 = boto3.client('s3')
