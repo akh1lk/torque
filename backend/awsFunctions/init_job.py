@@ -21,9 +21,19 @@ def init_job(job_id: str, bucket: str, fastapi_url: str, token: str):
     s3_download_dir(s3_images, paths.images)
 
     # SAM2 needs video, so imgs -> video
+    # Auto-detect input format (jpg or png)
+    sample_files = [f for f in os.listdir(paths.images) if f.startswith('0001.')]
+    if not sample_files:
+        raise FileNotFoundError("No images found starting with '0001.'")
+    
+    input_ext = sample_files[0].split('.')[-1]  # Get extension (jpg, png, etc.)
+    input_pattern = f"%04d.{input_ext}"
+    
+    print(f"Auto-detected input format: {input_ext}")
+    
     run_check(["ffmpeg", "-y",
-        "-framerate", "12",
-        "-i", os.path.join(paths.images, "%04d.png"),
+        "-framerate", "12", 
+        "-i", os.path.join(paths.images, input_pattern),
         "-c:v", "libx264",
         "-pix_fmt", "yuv420p",
         paths.video])

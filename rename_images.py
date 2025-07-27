@@ -45,10 +45,13 @@ def rename_images():
     print(f"📁 Creating renamed images in: {output_dir}")
     print()
     
-    # Rename and copy files
+    # Rename and copy files  
     for i, image_file in enumerate(image_files, start=1):
-        # New name format: 0001.png, 0002.png, etc.
-        new_name = f"{i:04d}.png"
+        # Keep original format, just rename: 0001.jpg, 0002.jpg, etc.
+        original_ext = image_file.suffix.lower()
+        if original_ext == '.jpeg':
+            original_ext = '.jpg'  # Standardize to .jpg
+        new_name = f"{i:04d}{original_ext}"
         new_path = output_dir / new_name
         
         # Copy file with new name
