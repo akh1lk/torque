@@ -80,8 +80,9 @@ def run_colmap_pipeline(paths: JobPaths, matching_type: str = "Sequential"):
 def main():
     parser = argparse.ArgumentParser(description="Run COLMAP reconstruction on RGBA images")
     parser.add_argument("--job_id", required=True, help="Job ID")
+    parser.add_argument("--bucket", required=True, help="S3 bucket name")
     parser.add_argument("--fastapi_url", required=True, help="FastAPI URL")
-    parser.add_argument("--token", required=True, help="FastAPI auth token")
+    parser.add_argument("--fastapi_token", required=True, help="FastAPI auth token")
     parser.add_argument("--matching_type", default="Sequential", 
                        choices=["Sequential", "Exhaustive", "Spatial"],
                        help="COLMAP feature matching type")
@@ -98,11 +99,11 @@ def main():
     success = run_colmap_pipeline(paths, args.matching_type)
     
     if success:
-        patch_status(args.fastapi_url, args.token, args.job_id, "colmap_done")
+        patch_status(args.fastapi_url, args.fastapi_token, args.job_id, "colmap_done")
         print(f"SUCCESS: COLMAP completed for job {args.job_id}")
         return 0
     else:
-        patch_status(args.fastapi_url, args.token, args.job_id, "colmap_failed")
+        patch_status(args.fastapi_url, args.fastapi_token, args.job_id, "colmap_failed")
         print(f"ERROR: COLMAP failed for job {args.job_id}")
         return 1
 

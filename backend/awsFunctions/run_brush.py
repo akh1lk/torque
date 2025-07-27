@@ -180,7 +180,7 @@ def main():
     parser.add_argument("--job_id", required=True, help="Job ID")
     parser.add_argument("--bucket", required=True, help="S3 bucket name")
     parser.add_argument("--fastapi_url", required=True, help="FastAPI URL")
-    parser.add_argument("--token", required=True, help="FastAPI auth token")
+    parser.add_argument("--fastapi_token", required=True, help="FastAPI auth token")
     parser.add_argument("--steps", default="30000", help="Training steps")
     parser.add_argument("--resolution", default="1024", help="Output resolution")
     
@@ -211,13 +211,13 @@ def main():
             print(f"Model uploaded to: {s3_model_prefix}")
 
         # Step 5: update job status
-        patch_status(args.fastapi_url, args.token, args.job_id, "brush_done")
+        patch_status(args.fastapi_url, args.fastapi_token, args.job_id, "brush_done")
         print(f"SUCCESS: Brush training completed for job {args.job_id}")
         return 0
         
     except Exception as e:
         print(f"ERROR: Brush training failed: {e}")
-        patch_status(args.fastapi_url, args.token, args.job_id, "brush_failed")
+        patch_status(args.fastapi_url, args.fastapi_token, args.job_id, "brush_failed")
         return 1
 
 if __name__ == "__main__":

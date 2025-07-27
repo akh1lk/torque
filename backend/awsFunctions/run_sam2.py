@@ -22,14 +22,14 @@ def main():
     parser.add_argument("--job_id", required=True, help="Job ID")
     parser.add_argument("--bucket", required=True, help="S3 bucket name")
     parser.add_argument("--fastapi_url", required=True, help="FastAPI URL")
-    parser.add_argument("--token", required=True, help="FastAPI auth token")
+    parser.add_argument("--fastapi_token", required=True, help="FastAPI auth token")
     
     args = parser.parse_args()
 
     job_id = args.job_id
     bucket = args.bucket
     fastapi_url = args.fastapi_url
-    token = args.token
+    token = args.fastapi_token
 
     paths = JobPaths(job_id)
     paths.ensure_dirs("rgba")
