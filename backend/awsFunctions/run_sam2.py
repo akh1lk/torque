@@ -70,3 +70,7 @@ def main():
         
     # Notify FastAPI of job completion
     patch_status(fastapi_url, token, job_id, "sam2_done")
+    print(f"SUCCESS: SAM2 completed for job {job_id}")
+
+if __name__ == "__main__":
+    main()
