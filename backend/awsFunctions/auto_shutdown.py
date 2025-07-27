@@ -20,18 +20,18 @@ def setup_shutdown_timer():
             capture_output=True, text=True, check=False
         )
         if result.returncode == 0:
-            print("✓ Auto-shutdown scheduled for 30 minutes")
+            print("Auto-shutdown scheduled for 30 minutes")
         else:
-            print(f"⚠ Failed to schedule shutdown: {result.stderr}")
+            print(f"Failed to schedule shutdown: {result.stderr}")
     except Exception as e:
-        print(f"⚠ Could not setup auto-shutdown: {e}")
+        print(f"Could not setup auto-shutdown: {e}")
 
 
 def cancel_shutdown():
     """Cancel pending shutdown."""
     try:
         subprocess.run(["sudo", "shutdown", "-c"], check=False)
-        print("✓ Cancelled auto-shutdown")
+        print("Cancelled auto-shutdown")
     except Exception:
         pass
 
@@ -51,9 +51,9 @@ def main():
     print(" Setting up 30-minute auto-shutdown")
     setup_shutdown_timer()
     
-    print("✓ Auto-shutdown active")
-    print("  Press Ctrl+C to cancel shutdown")
-    print("  Or run: sudo shutdown -c")
+    print("Auto-shutdown active")
+    print("Press Ctrl+C to cancel shutdown")
+    print("Or run: sudo shutdown -c")
     
     # Keep script running to maintain signal handlers
     try:

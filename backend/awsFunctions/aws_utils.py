@@ -65,6 +65,11 @@ def patch_status(fastapi_url: str, token: str, job_id: str, status: str):
     """
     PATCH status to FastAPI /jobs/{job_id} endpoint.
     """
+    # TESTING MODE: Skip FastAPI calls
+    if fastapi_url == "http://dummy" or fastapi_url == "dummy":
+        print(f"[TEST MODE] Would update job {job_id} status to: {status}")
+        return
+    
     headers = {'Authorization': f'Bearer {token}'}
     resp = requests.patch(f"{fastapi_url}/jobs/{job_id}", json={"status": status}, headers=headers)
     resp.raise_for_status()
