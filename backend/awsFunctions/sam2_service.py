@@ -174,6 +174,12 @@ class Sam2Service:
         # Convert BGR to RGB
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         
+        # Ensure mask dimensions match image dimensions
+        img_height, img_width = image_rgb.shape[:2]
+        if mask.shape != (img_height, img_width):
+            # Resize mask to match image dimensions
+            mask = cv2.resize(mask.astype(np.float32), (img_width, img_height), interpolation=cv2.INTER_NEAREST)
+        
         # Convert mask to 0-255 range for alpha channel
         alpha_channel = (mask > 0).astype(np.uint8) * 255
         
