@@ -37,6 +37,17 @@ class Sam2Service:
         else:
             # results without prompts
             result = self.sam_img(image_path)
+        # Debug: Check what result actually contains
+        print(f"DEBUG: result type: {type(result)}")
+        print(f"DEBUG: result content: {result}")
+        if hasattr(result, '__dict__'):
+            print(f"DEBUG: result attributes: {dir(result)}")
+        if isinstance(result, list):
+            print(f"DEBUG: result is list of length: {len(result)}")
+            if len(result) > 0:
+                print(f"DEBUG: first item type: {type(result[0])}")
+                print(f"DEBUG: first item: {result[0]}")
+        
         masks_arr = result.masks.data.cpu().numpy()  # (N,H,W)
         
         # Save masks as npz if output_dir is provided
