@@ -68,6 +68,7 @@ backend/test_workflow.py
 backend/awsFunctions/file_structure*
 
 images
+images_new
 masked_output
 masksfinal
 converted_images*
