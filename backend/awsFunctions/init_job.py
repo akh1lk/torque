@@ -64,9 +64,9 @@ def init_job(job_id: str, bucket: str, fastapi_url: str, token: str):
     
     print(f"Created preview overlay: {preview_overlay}")
 
-    # Upload preview to S3
+    # Upload preview to S3 (exclude NPZ files - internal use only)
     s3_preview = f"s3://{bucket}/{job_id}/preview/"
-    s3_upload_dir(paths.preview, s3_preview)
+    run_check(["aws", "s3", "cp", paths.preview, s3_preview, "--recursive", "--exclude", "*.npz"])
 
     patch_status(fastapi_url, token, job_id, "init_done")
     print("Job initialized successfully")

@@ -112,6 +112,10 @@ class Sam2Service:
         if image is None:
             raise ValueError(f"Could not load image from {image_path}")
         
+        # Ensure image is loaded correctly (OpenCV uses BGR)
+        print(f"DEBUG: Image loaded - shape: {image.shape}, dtype: {image.dtype}")
+        print(f"DEBUG: Image value range: {image.min()} to {image.max()}")
+        
         overlay = image.copy()
         
         # Handle different mask formats
