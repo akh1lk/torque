@@ -30,12 +30,10 @@ class Sam2Service:
         """
         predict with SAM single-frame
         """
-        result = None
+        # SAM2 image predictor usage - correct format
         if points and labels:
-            # results with prompts
             result = self.sam_img(image_path, points=points, labels=labels)
         else:
-            # results without prompts
             result = self.sam_img(image_path)
         # Handle SAM2 result format - it returns a list of Results objects
         if isinstance(result, list) and len(result) > 0:
@@ -64,12 +62,11 @@ class Sam2Service:
         """
         predict with SAM2 video
         """
-        results = self.sam_video(
-            source=video_path,
-            points=points if points else None,
-            labels=labels if labels else None,
-            stream=True
-        )
+        # SAM2 video predictor usage - format points and labels correctly
+        if points and labels:
+            results = self.sam_video(video_path, points=points, labels=labels)
+        else:
+            results = self.sam_video(video_path)
 
         output_dir = os.path.expanduser(f"~/torque/jobs/{job_id}")
         masks_dir = os.path.join(output_dir, "masks")
