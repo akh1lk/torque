@@ -25,6 +25,9 @@ def run_colmap_pipeline(paths: JobPaths, matching_type: str = "Sequential"):
     db_path = os.path.join(paths.colmap, "database.db")
     sparse_path = os.path.join(paths.colmap, "sparse")
     
+    # Create sparse directory
+    ensure_dir(sparse_path)
+    
     print(f"Running COLMAP pipeline")
     print(f"RGBA images: {paths.rgba}")
     print(f"Output: {paths.colmap}")
