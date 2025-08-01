@@ -65,7 +65,7 @@ def init_job(job_id: str, bucket: str, fastapi_url: str, token: str):
     s3_download_dir(s3_images, paths.images)
 
     # Resize images to 1024px max dimension for pipeline optimization
-    resize_images_to_max_dimension(paths.images, max_dimension=1024)
+    # resize_images_to_max_dimension(paths.images, max_dimension=1024)  # TEMPORARILY DISABLED
 
     # SAM2 needs video, so imgs -> video
     # Auto-detect input format (jpg or png)

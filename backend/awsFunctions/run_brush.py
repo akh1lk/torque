@@ -94,14 +94,15 @@ def run_brush_training(brush_data_dir: str, total_steps: str = "10000", bucket: 
     # Start background thread for progress uploads
     stop_upload = threading.Event()
     upload_thread = None
-    if bucket and job_id:
-        upload_thread = threading.Thread(
-            target=upload_progress_images,
-            args=(progress_dir, bucket, job_id, stop_upload)
-        )
-        upload_thread.daemon = True
-        upload_thread.start()
-        print("Started progress image upload thread")
+    # DISABLED UPLOAD THREAD
+    # if bucket and job_id:
+    #     upload_thread = threading.Thread(
+    #         target=upload_progress_images,
+    #         args=(progress_dir, bucket, job_id, stop_upload)
+    #     )
+    #     upload_thread.daemon = True
+    #     upload_thread.start()
+    #     print("Started progress image upload thread")
     
     # Brush training command with correct CLI arguments
     brush_cmd = [
@@ -113,8 +114,8 @@ def run_brush_training(brush_data_dir: str, total_steps: str = "10000", bucket: 
         "--export-path", export_dir,
         "--export-name", "export_{iter}.ply",
         "--alpha-loss-weight", "0.1",  # For transparency support
-        "--eval-every", "1000",
-        "--eval-save-to-disk",  # Save eval images to disk for progress
+        # "--eval-every", "1000",                    # DISABLED
+        # "--eval-save-to-disk",  # Save eval images to disk for progress  # DISABLED
         "--seed", "42"
     ]
     
@@ -133,10 +134,12 @@ def run_brush_training(brush_data_dir: str, total_steps: str = "10000", bucket: 
         
     finally:
         # Stop progress upload thread
-        if upload_thread:
-            stop_upload.set()
-            upload_thread.join(timeout=5)
-            print("Stopped progress upload thread")
+        # DISABLED - NO UPLOAD THREAD RUNNING
+        # if upload_thread:
+        #     stop_upload.set()
+        #     upload_thread.join(timeout=5)
+        #     print("Stopped progress upload thread")
+        pass
     
     # Check for exported PLY files
     ply_files = [f for f in os.listdir(export_dir) if f.endswith('.ply')]
