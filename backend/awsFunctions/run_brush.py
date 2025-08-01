@@ -105,13 +105,13 @@ def run_brush_training(brush_data_dir: str, total_steps: str = "10000", bucket: 
     
     # Brush training command with correct CLI arguments
     brush_cmd = [
-        os.path.expanduser("~/torque/brush/brush_app"),  # Path to brush executable
+        os.path.expanduser("~/torque/brush_app"),  # Path to brush executable
         brush_data_dir,  # Source path (COLMAP dataset)
         "--total-steps", total_steps,
         "--max-resolution", "1024",
-        "--export-every", "5000",  # Export every 5000 steps
+        "--export-every", "5000",  # Export every 5000 steps (will export at 5k and 10k)
         "--export-path", export_dir,
-        "--export-name", "model_{iter}.ply",
+        "--export-name", "export_{iter}.ply",
         "--alpha-loss-weight", "0.1",  # For transparency support
         "--eval-every", "1000",
         "--eval-save-to-disk",  # Save eval images to disk for progress
@@ -181,7 +181,7 @@ def main():
     parser.add_argument("--bucket", required=True, help="S3 bucket name")
     parser.add_argument("--fastapi_url", required=True, help="FastAPI URL")
     parser.add_argument("--fastapi_token", required=True, help="FastAPI auth token")
-    parser.add_argument("--steps", default="30000", help="Training steps")
+    parser.add_argument("--steps", default="10000", help="Training steps")
     parser.add_argument("--resolution", default="1024", help="Output resolution")
     
     args = parser.parse_args()
