@@ -1,5 +1,6 @@
 import argparse
 import os
+import cv2
 from aws_utils import (
     run_check, s3_download_dir, s3_upload_dir, patch_status,
     get_image_files, JobPaths, print_job_summary
@@ -7,6 +8,49 @@ from aws_utils import (
 from sam2_service import Sam2Service
 
 # actual job initialization
+
+def resize_images_to_max_dimension(images_dir: str, max_dimension: int = 1024):
+    """
+    Resize all images in directory to max dimension while preserving aspect ratio.
+    Processes images in-place to optimize storage and subsequent pipeline stages.
+    """
+    image_files = get_image_files(images_dir)
+    resized_count = 0
+    
+    for image_file in image_files:
+        image_path = os.path.join(images_dir, image_file)
+        
+        # Load image
+        image = cv2.imread(image_path)
+        if image is None:
+            print(f"Warning: Could not load {image_file}, skipping")
+            continue
+            
+        height, width = image.shape[:2]
+        
+        # Check if resize needed
+        if max(height, width) > max_dimension:
+            # Calculate new dimensions while preserving aspect ratio
+            if width > height:
+                new_width = max_dimension
+                new_height = int(height * (max_dimension / width))
+            else:
+                new_height = max_dimension
+                new_width = int(width * (max_dimension / height))
+            
+            # Resize image
+            resized_image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_AREA)
+            
+            # Save resized image (overwrite original)
+            cv2.imwrite(image_path, resized_image)
+            
+            print(f"Resized {image_file}: {width}x{height} → {new_width}x{new_height}")
+            resized_count += 1
+        else:
+            print(f"Kept {image_file}: {width}x{height} (already within {max_dimension}px)")
+    
+    print(f"Resized {resized_count}/{len(image_files)} images to max {max_dimension}px")
+    return resized_count
 
 def init_job(job_id: str, bucket: str, fastapi_url: str, token: str):
     paths = JobPaths(job_id)
@@ -19,6 +63,9 @@ def init_job(job_id: str, bucket: str, fastapi_url: str, token: str):
 
     s3_images = f"s3://{bucket}/{job_id}/images/"
     s3_download_dir(s3_images, paths.images)
+
+    # Resize images to 1024px max dimension for pipeline optimization
+    resize_images_to_max_dimension(paths.images, max_dimension=1024)
 
     # SAM2 needs video, so imgs -> video
     # Auto-detect input format (jpg or png)
