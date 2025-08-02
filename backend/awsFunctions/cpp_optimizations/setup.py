@@ -157,19 +157,19 @@ setup(
     long_description="""
     C++ optimizations for Torque 3D scanning pipeline featuring:
     
-    🚀 Performance Features:
+    Performance Features:
     • OpenMP parallelization across CPU cores (up to 4 threads)
     • SIMD vectorization with AVX2 support for pixel operations  
     • Optimized memory access patterns with alignment hints
     • Branchless alpha channel generation
     • Efficient PNG compression with OpenCV
     
-    📊 Measured Performance:
+    Measured Performance:
     • 6.2x speedup on EC2 g4dn.xlarge (4 vCPU, Intel Xeon)
     • Processes 12 images (2142×2856) in ~110ms vs 690ms Python
     • Throughput: ~50 MPix/s vs 8 MPix/s baseline
     
-    🔧 Integration:
+    Integration:
     • Drop-in replacement for sam2_service.py batch processing
     • Compatible return format for existing pipeline
     • Graceful fallback to Python if compilation fails
