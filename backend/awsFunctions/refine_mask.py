@@ -61,7 +61,7 @@ def main():
 
     # patch status w/ fastapi
     patch_status(fastapi_url, fastapi_token, job_id, 'preview_mask_ready')
-    print(f"[✔] Refined mask for job {job_id}")
+    print(f"Refined mask for job {job_id}")
 
 if __name__ == '__main__':
     main()
