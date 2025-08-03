@@ -66,6 +66,13 @@ backend/run_sam2.py
 backend/sam2_manager*
 backend/test_workflow.py
 backend/awsFunctions/file_structure*
+backend/sqs*
+backend/SQS*
+backend/supabase*
+
+sqs_queue
+SQS_SETUP
+supabase
 
 images
 images_new

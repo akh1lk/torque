@@ -1,6 +1,21 @@
 # Torque
 
-Torque is a 3D scanning web application that converts images into interactive 3D models using Gaussian Splatting and SAM2 Background Removal. Users can upload images, define object boundaries through an intuitive interface, and generate 3D models without backgrounds.
+**Transform 2D captures into interactive 3D assets using Gaussian Splatting**
+
+Torque converts multi-view images into high-quality 3D models. Capture objects from multiple angles, define boundaries with AI-powered masking, and generate photorealistic 3D assets with clean backgrounds for games, AR, and digital content.
+
+<table>
+<tr>
+<td width="50%">
+<img src="demo/bottle_image.jpg" alt="Input 2D Image" />
+<p align="center"><em>Input: Multi-view 2D captures</em></p>
+</td>
+<td width="50%">
+<img src="demo/bottle_3d_reconstruction.png" alt="3D Asset Result" />
+<p align="center"><em>Output: Interactive 3D asset</em></p>
+</td>
+</tr>
+</table>
 
 ## Architecture
 
@@ -11,13 +26,14 @@ Torque is a 3D scanning web application that converts images into interactive 3D
 
 ## Key Features
 
-- Video upload and frame extraction
-- Interactive brush masking interface with SAM2 integration
-- 3D reconstruction pipeline (SAM2 → COLMAP → Gaussian Splatting)
-- Real-time 3D model preview
-- RGBA image generation with transparent backgrounds
-- Authentication and user management
-- Dashboard for scan management
+- **Multi-View Capture**: Upload image sequences from different angles
+- **AI-Powered Masking**: SAM2 (Segment Anything Model 2) for precise object segmentation  
+- **Interactive Brush Tools**: Fine-tune object boundaries with intuitive masking interface
+- **3D Asset Generation**: COLMAP structure-from-motion + Gaussian Splatting
+- **Clean Asset Export**: RGBA generation with transparent backgrounds for production use
+- **Real-time Preview**: Interactive 3D viewer with orbit controls and lighting
+- **Cost-Effective Processing**: Smart EC2 scaling ($6-10/month vs $380/month 24/7)
+- **High Performance**: C++ optimizations with OpenMP + SIMD vectorization (6.2x speedup)
 
 ## File Structure
 
@@ -48,13 +64,13 @@ vercel.json          # Deployment configuration
 
 ## Processing Pipeline
 
-1. **Upload**: Users upload videos through the web interface
-2. **Frame Extraction**: Videos are processed into sequential frames (0001.png, 0002.png, etc.)
-3. **Brush Masking**: Users define object boundaries using interactive brush tools
-4. **SAM2 Segmentation**: Segment Anything Model 2 propagates masks across all frames
-5. **RGBA Generation**: Transparent background images are created using SAM2 masks
-6. **COLMAP**: Structure-from-Motion reconstruction generates camera poses and sparse point cloud
-7. **Gaussian Splatting**: Neural rendering creates interactive 3D models
+1. **Upload**: Users upload image sequences through the web interface
+2. **Interactive Masking**: Users define object boundaries using SAM2-powered brush tools
+3. **Segmentation**: Segment Anything Model 2 creates precise object masks
+4. **RGBA Generation**: Transparent background images are created using segmentation masks
+5. **COLMAP**: Structure-from-Motion reconstruction generates camera poses and sparse point cloud
+6. **Gaussian Splatting**: 3D reconstruction creates interactive models (powered by Brush engine)
+7. **Export**: Clean 3D assets ready for games, AR, and digital content
 
 ## Environment Requirements
 
