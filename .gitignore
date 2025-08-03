@@ -69,6 +69,7 @@ backend/awsFunctions/file_structure*
 backend/sqs*
 backend/SQS*
 backend/supabase*
+backend/DEPLOYMENT*
 
 sqs_queue
 SQS_SETUP
