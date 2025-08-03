@@ -58,8 +58,8 @@ def main():
         labels=labels
     )
 
-    # use masks to create rgba images
-    results = svc.batch_create_rgba_masks(
+    # use masks to create rgba images (c++ optimized when available)
+    results = svc.batch_create_rgba_masks_optimized(
         job_id=job_id,
         upload_to_s3=True,
         s3_bucket=bucket,

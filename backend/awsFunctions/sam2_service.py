@@ -6,6 +6,17 @@ from ultralytics import SAM
 from ultralytics.models.sam import SAM2VideoPredictor
 from typing import Optional, List, Tuple
 
+# c++ optimization support (graceful fallback to python)
+try:
+    import torque_cpp
+    CPP_AVAILABLE = True
+    print("c++ rgba optimization loaded successfully")
+    print(f"system info: {torque_cpp.optimization_info()}")
+except ImportError as e:
+    torque_cpp = None
+    CPP_AVAILABLE = False
+    print(f"c++ optimization not available, using python fallback: {e}")
+
 class Sam2Service:
     
     def __init__(self):
@@ -198,6 +209,104 @@ class Sam2Service:
         
         return output_path
     
+    def batch_create_rgba_masks_optimized(self, job_id: str, upload_to_s3: bool = True, s3_bucket: str = None, s3_prefix: str = None):
+        """
+        high-performance batch rgba processing using c++ optimization when available.
+        falls back to python implementation if c++ module not compiled.
+        
+        returns same format as original batch_create_rgba_masks for compatibility.
+        """
+        
+        if not CPP_AVAILABLE:
+            print("using python fallback for rgba processing")
+            return self.batch_create_rgba_masks(job_id, upload_to_s3, s3_bucket, s3_prefix)
+        
+        print("using c++ optimized rgba processing")
+        
+        # define paths (same as original method)
+        images_dir = os.path.expanduser(f"~/torque/jobs/{job_id}/images")
+        output_dir = os.path.expanduser(f"~/torque/jobs/{job_id}/rgba")
+        video_masks_path = os.path.expanduser(f"~/torque/jobs/{job_id}/masks/video_masks.npz")
+        
+        # validate inputs (same as original)
+        if not os.path.exists(images_dir):
+            raise ValueError(f"images directory not found: {images_dir}")
+        if not os.path.exists(video_masks_path):
+            raise ValueError(f"video masks file not found: {video_masks_path}")
+        if upload_to_s3 and not s3_bucket:
+            raise ValueError("s3_bucket is required when upload_to_s3=True")
+        
+        # load video masks array (same as original)
+        mask_data = np.load(video_masks_path)
+        if isinstance(mask_data, np.lib.npyio.NpzFile):
+            key = list(mask_data.keys())[0]
+            video_masks = mask_data[key]
+        else:
+            video_masks = mask_data
+        
+        # create output directory
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # get image files (same sorting as original)
+        image_files = [f for f in os.listdir(images_dir) 
+                      if f.lower().endswith(('.jpg', '.jpeg', '.png', '.heic')) 
+                      and not f.endswith('_video.mp4')]
+        image_files.sort()
+        
+        print(f"c++ processing: {len(image_files)} images, masks shape: {video_masks.shape}")
+        
+        # validate counts
+        if len(image_files) != video_masks.shape[0]:
+            raise ValueError(f"mismatch: {len(image_files)} images but {video_masks.shape[0]} masks")
+        
+        # prepare file paths for c++ processing
+        image_paths = [os.path.join(images_dir, img_file) for img_file in image_files]
+        output_paths = [os.path.join(output_dir, f"{os.path.splitext(img_file)[0]}.png") 
+                       for img_file in image_files]
+        
+        try:
+            # call c++ optimized batch processing
+            cpp_results = torque_cpp.batch_rgba(image_paths, video_masks, output_paths)
+            
+            # handle s3 uploads (same as original python method)
+            uploaded_count = 0
+            if upload_to_s3:
+                for output_file in cpp_results['output_files']:
+                    try:
+                        filename = os.path.basename(output_file)
+                        s3_key = f"{s3_prefix}/{filename}" if s3_prefix else filename
+                        self.s3.upload_file(output_file, s3_bucket, s3_key)
+                        uploaded_count += 1
+                        print(f"uploaded: s3://{s3_bucket}/{s3_key}")
+                    except Exception as e:
+                        print(f"s3 upload failed for {filename}: {e}")
+            
+            # format results to match original python method
+            results = {
+                'processed': cpp_results['processed'],
+                'errors': cpp_results['errors'], 
+                'uploaded': uploaded_count,
+                'output_files': cpp_results['output_files'],
+                # additional c++ performance metrics
+                'processing_time_ms': cpp_results.get('processing_time_ms', 0),
+                'throughput_mpix_per_sec': cpp_results.get('throughput_mpix_per_sec', 0),
+                'optimization_used': 'cpp'
+            }
+            
+            print(f"c++ batch processing complete:")
+            print(f"   processed: {results['processed']}/{len(image_files)}")
+            print(f"   errors: {results['errors']}")
+            print(f"   uploaded: {results['uploaded']}")
+            print(f"   time: {results['processing_time_ms']:.1f}ms")
+            print(f"   throughput: {results['throughput_mpix_per_sec']:.1f} mpix/s")
+            
+            return results
+            
+        except Exception as e:
+            print(f"c++ processing failed: {e}")
+            print("falling back to python implementation")
+            return self.batch_create_rgba_masks(job_id, upload_to_s3, s3_bucket, s3_prefix)
+
     def batch_create_rgba_masks(self, job_id: str, upload_to_s3: bool = True, s3_bucket: str = None, s3_prefix: str = None):
         """
         Create RGBA masks for all images in a job directory using video_masks.npz.
