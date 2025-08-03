@@ -73,6 +73,7 @@ backend/supabase*
 sqs_queue
 SQS_SETUP
 supabase
+rename_images.py
 
 images
 images_new

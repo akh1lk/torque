@@ -1,6 +1,6 @@
-# Torque
+# Torque - Image-to-3D Asset Reconstruction
 
-**Transform 2D captures into interactive 3D assets using Gaussian Splatting**
+**Transform 2D captures into interactive 3D assets using Gaussian Splatting & SAM2**
 
 Torque converts multi-view images into high-quality 3D models. Capture objects from multiple angles, define boundaries with AI-powered masking, and generate photorealistic 3D assets with clean backgrounds for games, AR, and digital content.
 
