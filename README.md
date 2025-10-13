@@ -32,8 +32,7 @@ Torque converts multi-view images into high-quality 3D models. Capture objects f
 - **3D Asset Generation**: COLMAP structure-from-motion + Gaussian Splatting
 - **Clean Asset Export**: RGBA generation with transparent backgrounds for production use
 - **Real-time Preview**: Interactive 3D viewer with orbit controls and lighting
-- **Cost-Effective Processing**: Smart EC2 scaling ($6-10/month vs $380/month 24/7)
-- **High Performance**: C++ optimizations with OpenMP + SIMD vectorization (6.2x speedup)
+- **High Performance**: C++ optimizations with OpenMP + SIMD vectorization
 
 ## File Structure
 

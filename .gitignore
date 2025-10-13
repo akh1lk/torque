@@ -70,6 +70,7 @@ backend/sqs*
 backend/SQS*
 backend/supabase*
 backend/DEPLOYMENT_GUIDE.md
+backend/awsFunctions/cpp_optimizations/README.md
 
 sqs_queue
 SQS_SETUP
@@ -83,4 +84,5 @@ masksfinal
 converted_images*
 images.bin*
 CLAUDE.md
+WORKFLOW.md
 # backend/awsFunctions/
