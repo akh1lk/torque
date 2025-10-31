@@ -2,7 +2,7 @@
 
 **Transform 2D captures into interactive 3D assets using Gaussian Splatting & SAM2**
 
-Torque converts multi-view images into high-quality 3D models. Capture objects from multiple angles, define boundaries with AI-powered masking, and generate photorealistic 3D assets with clean backgrounds for games, AR, and digital content.
+Torque: A pipeline for converting 2D images of a real-world asset into high-quality 3D models for VFX hobbyists to use in games, AR, and other digital media (TikTok, Instagram, etc!)
 
 <table>
 <tr>
@@ -19,21 +19,21 @@ Torque converts multi-view images into high-quality 3D models. Capture objects f
 
 ## Architecture
 
-- **Frontend**: Next.js 13 with React Three Fiber for 3D visualization
-- **Backend**: FastAPI for video processing pipeline
-- **Processing**: AWS EC2 instances running SAM2 → COLMAP → Gaussian Splatting pipeline
-- **Storage**: S3 buckets for asset management
+- **Frontend:** Next.js 13 + React Three Fiber for 3D visualization  
+- **Backend:** FastAPI handling video and image processing  
+- **Processing:** SAM2 → COLMAP → Gaussian Splatting on AWS EC2  
+- **Storage:** AWS S3 for managing assets and exports  
 
-## Key Features
+## Processing Pipeline
 
-- **Multi-View Capture**: Upload image sequences from different angles
-- **AI-Powered Masking**: SAM2 (Segment Anything Model 2) for precise object segmentation  
-- **Interactive Brush Tools**: Fine-tune object boundaries with intuitive masking interface
-- **3D Asset Generation**: COLMAP structure-from-motion + Gaussian Splatting
-- **Clean Asset Export**: RGBA generation with transparent backgrounds for production use
-- **Real-time Preview**: Interactive 3D viewer with orbit controls and lighting
-- **High Performance**: C++ optimizations with OpenMP + SIMD vectorization
-
+1. **Upload**: Users upload image sequences through the web interface
+2. **User-Interactive Masking**: Users define object boundaries via Meta's SAM2 Image Segmentation Model
+3. **RGBA Generation**: Transparent background images are created via segmentation masks
+4. **Performance**: Used C++ to Parallelize OpenCV & RGBA operations via OpenMP and SIMD
+5. **COLMAP**: Structure-from-Motion reconstruction generates camera poses and sparse point cloud (SfM model for points)
+6. **Gaussian Splatting**: 3D reconstruction creates interactive models (powered by Brush engine)
+7. **Export**: Clean 3D assets ready for games, AR, and digital content
+  
 ## File Structure
 
 ### Frontend (Next.js)
@@ -44,7 +44,7 @@ contexts/             # React context providers
 public/               # Static assets
 ```
 
-### Backend (FastAPI)
+### Backend (FastAPI hosted separately)
 ```
 api/                  # FastAPI server and endpoints
 backend/awsFunctions/ # EC2 processing scripts
@@ -54,26 +54,15 @@ backend/awsFunctions/ # EC2 processing scripts
   └── sam2_service.py      # SAM2 service wrapper
 ```
 
-### Configuration
+### Config
 ```
 requirements.txt      # Python dependencies
 package.json         # Node.js dependencies
 vercel.json          # Deployment configuration
 ```
 
-## Processing Pipeline
-
-1. **Upload**: Users upload image sequences through the web interface
-2. **Interactive Masking**: Users define object boundaries using SAM2-powered brush tools
-3. **Segmentation**: Segment Anything Model 2 creates precise object masks
-4. **RGBA Generation**: Transparent background images are created using segmentation masks
-5. **COLMAP**: Structure-from-Motion reconstruction generates camera poses and sparse point cloud
-6. **Gaussian Splatting**: 3D reconstruction creates interactive models (powered by Brush engine)
-7. **Export**: Clean 3D assets ready for games, AR, and digital content
-
 ## Environment Requirements
 
-- Node.js with pnpm package manager
-- Python 3.x with virtual environment
-- AWS credentials for S3 and EC2 access
-- CUDA-compatible GPU for SAM2 and Gaussian Splatting processing
+- Node.js + pnpm package manager
+- Python 3.x with venv
+- AWS creds for S3 and EC2 access OR CUDA-compatible GPU for SAM2 and Gaussian Splatting processing
